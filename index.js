@@ -10,6 +10,17 @@ app.use(cors());
 const analyticsMiddleware = require('./middleware/analytics');
 app.use(analyticsMiddleware);
 
+// Vercel Speed Insights Configuration
+// NOTE: Speed Insights is a CLIENT-SIDE tool that measures real user performance in the browser.
+// This backend API cannot use Speed Insights directly. Instead, integrate it in your frontend:
+// - For HTML: Add <script defer src="/_vercel/speed-insights/script.js"></script>
+// - For React/Next.js: Use @vercel/speed-insights package
+// See middleware/speed-insights.js for detailed integration instructions.
+//
+// For backend performance monitoring, we provide a performance middleware:
+const { performanceMiddleware } = require('./middleware/speed-insights');
+app.use(performanceMiddleware);
+
 const route = require('./Route/route');
 const PORT = 3000;
 
