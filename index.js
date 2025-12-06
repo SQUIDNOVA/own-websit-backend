@@ -26,6 +26,8 @@ app.use(async (req, res, next) => {
   }
 });
 
+app.use(express.static('public'));
+
 // Routes
 app.use('/', route);
 
