@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const createDB = require('./config/db');
-const analyticsMiddleware = require('./middleware/analytics');
 const { performanceMiddleware } = require('./middleware/speed-insights');
 const route = require('./Route/route');
 
@@ -11,7 +10,6 @@ app.use(express.json());
 app.use(cors());
 
 // Middlewares
-app.use(analyticsMiddleware);
 app.use(performanceMiddleware);
 
 // IMPORTANT:
