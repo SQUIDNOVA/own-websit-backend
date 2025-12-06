@@ -1,31 +1,35 @@
 const express = require('express');
-const app = express();
-app.use(express.json());
-const createDB = require('./config/db');
-createDB();
 const cors = require('cors');
+const createDB = require('./config/db');
+const analyticsMiddleware = require('./middleware/analytics');
+const { performanceMiddleware } = require('./middleware/speed-insights');
+const route = require('./Route/route');
+
+const app = express();
+
+app.use(express.json());
 app.use(cors());
 
-// Vercel Web Analytics - Server-side tracking middleware
-const analyticsMiddleware = require('./middleware/analytics');
+// Middlewares
 app.use(analyticsMiddleware);
-
-// Vercel Speed Insights Configuration
-// NOTE: Speed Insights is a CLIENT-SIDE tool that measures real user performance in the browser.
-// This backend API cannot use Speed Insights directly. Instead, integrate it in your frontend:
-// - For HTML: Add <script defer src="/_vercel/speed-insights/script.js"></script>
-// - For React/Next.js: Use @vercel/speed-insights package
-// See middleware/speed-insights.js for detailed integration instructions.
-//
-// For backend performance monitoring, we provide a performance middleware:
-const { performanceMiddleware } = require('./middleware/speed-insights');
 app.use(performanceMiddleware);
 
-const route = require('./Route/route');
-const PORT = 3000;
+// IMPORTANT:
+// Do NOT call createDB() here.
+// Serverless cannot connect on cold start.
 
+app.use(async (req, res, next) => {
+  try {
+    await createDB();   // Connect DB before route runs
+    next();
+  } catch (err) {
+    console.error("DB connection error:", err);
+    return res.status(500).json({ error: "Database connection failed" });
+  }
+});
+
+// Routes
 app.use('/', route);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Export for Vercel
+module.exports = app;
